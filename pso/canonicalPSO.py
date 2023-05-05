@@ -17,7 +17,7 @@ class CanonicalPSO:
             self,
             objectFunction:Problem,
             populationSize:int = 20, 
-            maxGeneration:int = 1000,
+            maxGeneration:int = 4000,
             c1:float = 2.0,
             c2:float = 2.0,
             w:float = 0.9,
