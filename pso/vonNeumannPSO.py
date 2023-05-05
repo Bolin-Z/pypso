@@ -1,20 +1,20 @@
-"""AIWPSO.py Adaptive inertia weight PSO
+"""vonNeumannPSO.py von Neumann PSO
 """
 from .canonicalPSO import CanonicalParticle
 from functions.problem import Problem
 from random import uniform as rand
-from random import gauss as gauss
-from random import randint as randint
 
-class AIWPSO:
+class ParticleWithNeighbours(CanonicalParticle):
+    def __init__(self, D: int) -> None:
+        super().__init__(D)
+        self.neighbours:list["ParticleWithNeighbours"] = []
+
+class VonNeumannPSO:
     def run(self) -> tuple[float, list[float]]:
         while self.g < self.G:
-            # count number of improved particles in this generation
-            self.successCount = 0
             self._updateSwarm()
-            self._updateGbestandGworst()
+            self._updateGbest()
             self._updateInertiaWeight()
-            self._mutatedAndReplace()
             self.g += 1
         gbest = self.swarm[self.gBestIndex]
         return (gbest.fpbest, gbest.pbest)
@@ -22,27 +22,30 @@ class AIWPSO:
     def __init__(
             self,
             objectFunction:Problem,
-            populationSize:int = 20,
+            row:int = 5,
+            col:int = 4,
             maxGeneration:int = 4000,
             c1:float = 1.49445,
             c2:float = 1.49445,
-            wmin:float = 0.0,
-            wmax:float = 1.0,
+            wmin:float = 0.4,
+            wmax:float = 0.9,
             vmaxPercent:float = 0.2,
-            initialSwarm:list[CanonicalParticle] = None
+            initialSwarm:list[ParticleWithNeighbours] = None
         ) -> None:
-
+        
         self.f = objectFunction.evaluate
         self.fitter = objectFunction.fitter
 
         self.dim = objectFunction.D
-        self.popSize = populationSize
+        self.popSize = row * col
+        self.row = row
+        self.col = col
         self.G = maxGeneration
         self.c1 = c1
         self.c2 = c2
         self.wmin = wmin
         self.wmax = wmax
-        self.w = 1.0
+        self.w = 0.9
         self.g = 0
 
         self.lb = objectFunction.lb
@@ -52,17 +55,15 @@ class AIWPSO:
         self.swarm = initialSwarm
         if not self.swarm:
             self._initialSwarm()
-        
-        self.gBestIndex:int = 0
-        self.gWorstIndex:int = 0
-        self._updateGbestandGworst()
+        self._constructNeighbourHood()
 
-        self.successCount:int = 0
-            
+        self.gBestIndex:int = 0
+        self._updateGbest()
+
     def _initialSwarm(self) -> None:
         self.swarm = []
         for _ in range(self.popSize):
-            newParticle = CanonicalParticle(self.dim)
+            newParticle = ParticleWithNeighbours(self.dim)
             for d in range(self.dim):
                 newParticle.x[d] = rand(self.lb[d], self.ub[d])
                 newParticle.v[d] = rand(-self.vmax[d], self.vmax[d])
@@ -70,25 +71,35 @@ class AIWPSO:
             newParticle.updatePbest()
             self.swarm.append(newParticle)
 
-    def _updateGbestandGworst(self) -> None:
+    def _constructNeighbourHood(self) -> None:
+        for r in range(self.row):
+            for c in range(self.col):
+                p = self.swarm[r * self.col + c]
+                up = (r - 1) % self.row * self.col + c
+                down = (r + 1) % self.row * self.col + c
+                left = r * self.col + (c - 1) % self.col
+                right = r * self.col + (c + 1) % self.col
+                for i in [up, down, left, right]:
+                    p.neighbours.append(self.swarm[i])
+
+
+    def _updateGbest(self) -> None:
         for i in range(self.popSize):
             if self.fitter(self.swarm[i].fpbest, self.swarm[self.gBestIndex].fpbest):
                 self.gBestIndex = i
-            elif self.fitter(self.swarm[self.gWorstIndex].fpbest, self.swarm[i].fpbest):
-                self.gWorstIndex = i
 
     def _updateSwarm(self) -> None:
-        gBest = self.swarm[self.gBestIndex]
         for i in range(self.popSize):
             p = self.swarm[i]
+            lbest = self._getLocalBest(i)
             for d in range(self.dim):
                 # update velocity
                 p.v[d] = self.w * p.v[d] + self.c1 * rand(0,1) * (p.pbest[d] - p.x[d]) \
-                            + self.c2 * rand(0,1) * (gBest.pbest[d] - p.x[d])
+                            + self.c2 * rand(0,1) * (lbest.pbest[d] - p.x[d])
                 if p.v[d] > self.vmax[d]:
                     p.v[d] = self.vmax[d]
-                elif p.v[d] < -self.vmax[d]:
-                    p.v[d] = -self.vmax[d]
+                elif p.v[d] < - self.vmax[d]:
+                    p.v[d] = - self.vmax[d]
                 # update position
                 p.x[d] = p.x[d] + p.v[d]
                 if p.x[d] > self.ub[d]:
@@ -98,28 +109,15 @@ class AIWPSO:
             # evaluate fitness and update pbest
             p.fx = self.f(p.x)
             if(self.fitter(p.fx, p.fpbest)):
-                # increase the number of improved particles
-                self.successCount += 1
                 p.updatePbest()
+    
+    def _getLocalBest(self, idx:int) -> ParticleWithNeighbours:
+        p = self.swarm[idx]
+        res = p
+        for n in p.neighbours:
+            if self.fitter(n.fpbest, res.fpbest):
+                res = n
+        return res
 
     def _updateInertiaWeight(self) -> None:
-        ps = self.successCount / self.popSize
-        self.w = self.wmin + (self.wmax - self.wmin) * ps
-
-    def _mutatedAndReplace(self) -> None:
-        gBest = self.swarm[self.gBestIndex]
-        gWorst = self.swarm[self.gWorstIndex]
-
-        mutatedim = randint(0, self.dim - 1)
-        sigma = (1 - self.g / self.G) * (self.ub[mutatedim] - self.lb[mutatedim])
-        # copy
-        gWorst.pbest = [x for x in gBest.pbest]
-        gWorst.pbest[mutatedim] = gWorst.pbest[mutatedim] + gauss(0, sigma)
-        if gWorst.pbest[mutatedim] > self.ub[mutatedim]:
-            gWorst.pbest[mutatedim] = self.ub[mutatedim]
-        elif gWorst.pbest[mutatedim] < self.lb[mutatedim]:
-            gWorst.pbest[mutatedim] = self.lb[mutatedim]
-        
-        gWorst.fpbest = self.f(gWorst.pbest)
-        if self.fitter(gWorst.fpbest, gBest.fpbest):
-            self.gBestIndex = self.gWorstIndex
+        self.w = self.wmax - (self.wmax - self.wmin) * (self.g / self.G)
