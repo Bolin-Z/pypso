@@ -1,59 +1,64 @@
-"""canonicalPSO.py
-    Canonical PSO
-    Original PSO
+"""AIWPSO.py Adaptive inertia weight PSO
 """
-from .common import BaseParticle
+from .canonicalPSO import CanonicalParticle
 from functions.problem import Problem
 from random import uniform as rand
+from random import gauss as gauss
+from random import randint as randint
 
-class CanonicalParticle(BaseParticle):
-    def __init__(self, D:int) -> None:
-        super().__init__(D)
-        self.v = [0.0 for _ in range(D)]
-
-class CanonicalPSO:
+class AIWPSO:
     def run(self) -> tuple[float, list[float]]:
         while self.g < self.G:
+            # count number of improved particles in this generation
+            self.successCount = 0
             self._updateSwarm()
-            self._updateGbest()
+            self._updateGbestandGworst()
+            self._updateInertiaweight()
+            self._mutatedAndReplace()
             self.g += 1
         gbest = self.swarm[self.gBestIndex]
         return (gbest.fpbest, gbest.pbest)
-    
+
     def __init__(
             self,
             objectFunction:Problem,
-            populationSize:int = 20, 
+            populationSize:int = 20,
             maxGeneration:int = 4000,
-            c1:float = 2.0,
-            c2:float = 2.0,
-            w:float = 0.9,
+            c1:float = 1.49445,
+            c2:float = 1.49445,
+            wmin:float = 0.0,
+            wmax:float = 1.0,
             vmaxPercent:float = 0.2,
             initialSwarm:list[CanonicalParticle] = None
         ) -> None:
 
         self.f = objectFunction.evaluate
         self.fitter = objectFunction.fitter
-        
+
         self.dim = objectFunction.D
         self.popSize = populationSize
         self.G = maxGeneration
         self.c1 = c1
         self.c2 = c2
-        self.w = w
+        self.wmin = wmin
+        self.wmax = wmax
+        self.w = 1.0
         self.g = 0
 
         self.lb = objectFunction.lb
-        self.ub = objectFunction.ub        
+        self.ub = objectFunction.ub
         self.vmax = [vmaxPercent * (self.ub[x] - self.lb[x]) for x in range(self.dim)]
-        
+
         self.swarm = initialSwarm
         if not self.swarm:
             self._initialSwarm()
         
         self.gBestIndex:int = 0
-        self._updateGbest()
+        self.gWorstIndex:int = 0
+        self._updateGbestandGworst()
 
+        self.successCount:int = 0
+            
     def _initialSwarm(self) -> None:
         self.swarm = []
         for _ in range(self.popSize):
@@ -64,12 +69,14 @@ class CanonicalPSO:
             newParticle.fx = self.f(newParticle.x)
             newParticle.updatePbest()
             self.swarm.append(newParticle)
-    
-    def _updateGbest(self) -> None:
+
+    def _updateGbestandGworst(self) -> None:
         for i in range(self.popSize):
             if self.fitter(self.swarm[i].fpbest, self.swarm[self.gBestIndex].fpbest):
                 self.gBestIndex = i
-    
+            elif self.fitter(self.swarm[self.gWorstIndex].fpbest, self.swarm[i].fpbest):
+                self.gWorstIndex = i
+
     def _updateSwarm(self) -> None:
         gBest = self.swarm[self.gBestIndex]
         for i in range(self.popSize):
@@ -91,26 +98,28 @@ class CanonicalPSO:
             # evaluate fitness and update pbest
             p.fx = self.f(p.x)
             if(self.fitter(p.fx, p.fpbest)):
+                # increase the number of improved particles
+                self.successCount += 1
                 p.updatePbest()
 
-class OriginalPSO(CanonicalPSO):
-    def __init__(
-            self, 
-            objectFunction: Problem, 
-            populationSize: int = 20, 
-            maxGeneration: int = 1000, 
-            c1: float = 2, 
-            c2: float = 2, 
-            vmaxPercent: float = 0.2, 
-            initialSwarm: list[CanonicalParticle] = None
-        ) -> None:
-        super().__init__(
-            objectFunction, 
-            populationSize, 
-            maxGeneration, 
-            c1, 
-            c2, 
-            1.0, 
-            vmaxPercent, 
-            initialSwarm
-        )
+    def _updateInertiaweight(self) -> None:
+        ps = self.successCount / self.popSize
+        self.w = self.wmin + (self.wmax - self.wmin) * ps
+
+    def _mutatedAndReplace(self) -> None:
+        gBest = self.swarm[self.gBestIndex]
+        gWorst = self.swarm[self.gWorstIndex]
+
+        mutatedim = randint(0, self.dim - 1)
+        sigma = (1 - self.g / self.G) * (self.ub[mutatedim] - self.lb[mutatedim])
+        # copy
+        gWorst.pbest = [x for x in gBest.pbest]
+        gWorst.pbest[mutatedim] = gWorst.pbest[mutatedim] + gauss(0, sigma)
+        if gWorst.pbest[mutatedim] > self.ub[mutatedim]:
+            gWorst.pbest[mutatedim] = self.ub[mutatedim]
+        elif gWorst.pbest[mutatedim] < self.lb[mutatedim]:
+            gWorst.pbest[mutatedim] = self.lb[mutatedim]
+        
+        gWorst.fpbest = self.f(gWorst.pbest)
+        if self.fitter(gWorst.fpbest, gBest.fpbest):
+            self.gBestIndex = self.gWorstIndex
