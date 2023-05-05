@@ -1,5 +1,6 @@
 from random import random
 from pso.canonicalPSO import CanonicalPSO
+from pso.bareBonesPSO import BareBonesPSO
 from functions import *
 
 
@@ -8,8 +9,11 @@ if __name__ == "__main__":
         [-100 for _ in range(2)],
         [ 100 for _ in range(2)]
     )
-    pso = CanonicalPSO(fit)
-    val, res = pso.run()
-
+    pso1 = CanonicalPSO(fit)
+    val, res = pso1.run()
+    print(val)
+    print(res)
+    pso2 = BareBonesPSO(fit)
+    val, res = pso2.run()
     print(val)
     print(res)

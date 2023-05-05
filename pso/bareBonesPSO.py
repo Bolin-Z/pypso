@@ -1,17 +1,17 @@
-"""canonicalPSO.py
-    Canonical PSO
-    Original PSO
+"""bareBonesPSO.py 
+    Bare Bones Particle Swarm 
+    Bare Bones Particle Swarm with jumps
 """
 from .common import BaseParticle
 from functions.problem import Problem
+from random import gauss as gauss
 from random import uniform as rand
 
-class CanonicalParticle(BaseParticle):
+class BareBonesParticle(BaseParticle):
     def __init__(self, D:int) -> None:
         super().__init__(D)
-        self.v = [0.0 for _ in range(D)]
 
-class CanonicalPSO:
+class BareBonesPSO:
     def run(self) -> tuple[float, list[float]]:
         while self.g < self.G:
             self._updateSwarm()
@@ -19,52 +19,45 @@ class CanonicalPSO:
             self.g += 1
         gbest = self.swarm[self.gBestIndex]
         return (gbest.fpbest, gbest.pbest)
-    
+
     def __init__(
             self,
             objectFunction:Problem,
-            populationSize:int = 20, 
+            populationSize:int = 20,
             maxGeneration:int = 4000,
-            c1:float = 2.0,
-            c2:float = 2.0,
-            w:float = 0.9,
-            vmaxPercent:float = 0.2,
-            initialSwarm:list[CanonicalParticle] = None
+            interactionProbability:float = 0.5,
+            initialSwarm:list[BareBonesParticle] = None
         ) -> None:
-
+        
         self.f = objectFunction.evaluate
         self.fitter = objectFunction.fitter
-        
+
         self.dim = objectFunction.D
         self.popSize = populationSize
         self.G = maxGeneration
-        self.c1 = c1
-        self.c2 = c2
-        self.w = w
+        self.ip = interactionProbability
         self.g = 0
 
         self.lb = objectFunction.lb
-        self.ub = objectFunction.ub        
-        self.vmax = [vmaxPercent * (self.ub[x] - self.lb[x]) for x in range(self.dim)]
-        
+        self.ub = objectFunction.ub
+
         self.swarm = initialSwarm
         if not self.swarm:
             self._initialSwarm()
         
         self.gBestIndex:int = 0
         self._updateGbest()
-
+    
     def _initialSwarm(self) -> None:
         self.swarm = []
         for _ in range(self.popSize):
-            newParticle = CanonicalParticle(self.dim)
+            newParticle = BareBonesParticle(self.dim)
             for d in range(self.dim):
                 newParticle.x[d] = rand(self.lb[d], self.ub[d])
-                newParticle.v[d] = rand(-self.vmax[d], self.vmax[d])
             newParticle.fx = self.f(newParticle.x)
             newParticle.updatePbest()
             self.swarm.append(newParticle)
-    
+
     def _updateGbest(self) -> None:
         for i in range(self.popSize):
             if self.fitter(self.swarm[i].fpbest, self.swarm[self.gBestIndex].fpbest):
@@ -75,42 +68,23 @@ class CanonicalPSO:
         for i in range(self.popSize):
             p = self.swarm[i]
             for d in range(self.dim):
-                # update velocity
-                p.v[d] = self.w * p.v[d] + self.c1 * rand(0,1) * (p.pbest[d] - p.x[d]) \
-                        + self.c2 * rand(0,1) * (gBest.pbest[d] - p.x[d])
-                if p.v[d] > self.vmax[d]:
-                    p.v[d] = self.vmax[d]
-                elif p.v[d] < -self.vmax[d]:
-                    p.v[d] = -self.vmax[d]
-                # update position
-                p.x[d] = p.x[d] + p.v[d]
+                # interaction probability
+                r = rand(0,1)
+                if r < 0.5:
+                    # use gauss distribution to update
+                    p.x[d] = gauss(
+                        mu = (p.pbest[d] + gBest.pbest[d]) / 2,
+                        sigma = (abs(p.pbest[d] - gBest.pbest[d])) 
+                    )
+                else:
+                    # learn from previous best
+                    p.x[d] = p.pbest[d]
+                # amend position
                 if p.x[d] > self.ub[d]:
                     p.x[d] = self.ub[d]
                 elif p.x[d] < self.lb[d]:
                     p.x[d] = self.lb[d]
             # evaluate fitness and update pbest
             p.fx = self.f(p.x)
-            if(self.fitter(p.fx, p.fpbest)):
+            if (self.fitter(p.fx, p.fpbest)):
                 p.updatePbest()
-
-class OriginalPSO(CanonicalPSO):
-    def __init__(
-            self, 
-            objectFunction: Problem, 
-            populationSize: int = 20, 
-            maxGeneration: int = 1000, 
-            c1: float = 2, 
-            c2: float = 2, 
-            vmaxPercent: float = 0.2, 
-            initialSwarm: list[CanonicalParticle] = None
-        ) -> None:
-        super().__init__(
-            objectFunction, 
-            populationSize, 
-            maxGeneration, 
-            c1, 
-            c2, 
-            1.0, 
-            vmaxPercent, 
-            initialSwarm
-        )
