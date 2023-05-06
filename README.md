@@ -5,6 +5,10 @@ Particle Swarm Optimization and its variants implemented in python
 1. Original PSO
 2. Canonical PSO
 3. Bare bones PSO
+4. Adaptive inertia weight PSO
+5. Canonical PSO with von Neumann topology
+6. PSO with aging leader and challenger
+7. Dynamic multi-swarm PSO
 
 # Test functions
 ## Unimodal functions

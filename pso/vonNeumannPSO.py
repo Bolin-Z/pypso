@@ -45,7 +45,7 @@ class VonNeumannPSO:
         self.c2 = c2
         self.wmin = wmin
         self.wmax = wmax
-        self.w = 0.9
+        self.w = self.wmax
         self.g = 0
 
         self.lb = objectFunction.lb
