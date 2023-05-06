@@ -80,10 +80,7 @@ class BareBonesPSO:
                     # learn from previous best
                     p.x[d] = p.pbest[d]
                 # amend position
-                if p.x[d] > self.ub[d]:
-                    p.x[d] = self.ub[d]
-                elif p.x[d] < self.lb[d]:
-                    p.x[d] = self.lb[d]
+                p.x[d] = max(self.lb[d], min(self.ub[d], p.x[d]))
             # evaluate fitness and update pbest
             p.fx = self.f(p.x)
             if (self.fitter(p.fx, p.fpbest)):

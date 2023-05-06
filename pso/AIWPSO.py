@@ -4,7 +4,7 @@ from .canonicalPSO import CanonicalParticle
 from functions.problem import Problem
 from random import uniform as rand
 from random import gauss as gauss
-from random import randint as randint
+from random import randrange as randrange
 
 class AIWPSO:
     def run(self) -> tuple[float, list[float]]:
@@ -85,16 +85,10 @@ class AIWPSO:
                 # update velocity
                 p.v[d] = self.w * p.v[d] + self.c1 * rand(0,1) * (p.pbest[d] - p.x[d]) \
                             + self.c2 * rand(0,1) * (gBest.pbest[d] - p.x[d])
-                if p.v[d] > self.vmax[d]:
-                    p.v[d] = self.vmax[d]
-                elif p.v[d] < -self.vmax[d]:
-                    p.v[d] = -self.vmax[d]
+                p.v[d] = max(-self.vmax[d], min(self.vmax[d], p.v[d]))
                 # update position
                 p.x[d] = p.x[d] + p.v[d]
-                if p.x[d] > self.ub[d]:
-                    p.x[d] = self.ub[d]
-                elif p.x[d] < self.lb[d]:
-                    p.x[d] = self.lb[d]
+                p.x[d] = max(self.lb[d], min(self.ub[d], p.x[d]))
             # evaluate fitness and update pbest
             p.fx = self.f(p.x)
             if(self.fitter(p.fx, p.fpbest)):
@@ -110,7 +104,7 @@ class AIWPSO:
         gBest = self.swarm[self.gBestIndex]
         gWorst = self.swarm[self.gWorstIndex]
 
-        mutatedim = randint(0, self.dim - 1)
+        mutatedim = randrange(0, self.dim)
         sigma = (1 - self.g / self.G) * (self.ub[mutatedim] - self.lb[mutatedim])
         # copy
         gWorst.pbest = [x for x in gBest.pbest]
