@@ -9,6 +9,7 @@ Particle Swarm Optimization and its variants implemented in python
 5. Canonical PSO with von Neumann topology
 6. PSO with aging leader and challenger
 7. Dynamic multi-swarm PSO
+8. Orthogonal learning PSO
 
 # Test functions
 ## Unimodal functions

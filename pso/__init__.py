@@ -4,6 +4,7 @@ from .AIWPSO import AIWPSO
 from .vonNeumannPSO import VonNeumannPSO
 from .ALCPSO import ALCPSO
 from .DMSPSO import DMSPSO
+from .OLPSO import OLPSO
 
 __all__ = [
     "OriginalPSO",
@@ -12,5 +13,6 @@ __all__ = [
     "AIWPSO",
     "VonNeumannPSO",
     "ALCPSO",
-    "DMSPSO"
+    "DMSPSO",
+    "OLPSO"
 ]

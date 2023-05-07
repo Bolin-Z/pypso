@@ -21,7 +21,8 @@ if __name__ == "__main__":
         AIWPSO, 
         ALCPSO,
         VonNeumannPSO,
-        DMSPSO
+        DMSPSO,
+        OLPSO
     ]
     for f in problems:
         print(f"{f}:")
