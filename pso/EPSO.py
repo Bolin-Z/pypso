@@ -1,21 +1,27 @@
-"""bareBonesPSO.py Bare Bones Particle Swarm 
+""" EPSO.py Extraordinariness PSO
 """
 from .common import BaseParticle
 from functions.problem import Problem
-from random import gauss as gauss
 from random import uniform as rand
+from typing import Callable
 
-class BareBonesParticle(BaseParticle):
-    def __init__(self, D:int) -> None:
+class ExtraParticle(BaseParticle):
+    def __init__(self, D:int, fitter:Callable[[float,  float], bool]) -> None:
         super().__init__(D)
+        self.fitter = fitter
+    def __lt__(self, other:"ExtraParticle") -> bool:
+        return self.fitter(other.fpbest, self.fpbest)
+    def __eq__(self, other:"ExtraParticle") -> bool:
+        return self.fpbest == other.fpbest
 
-class BareBonesPSO:
+class EPSO:
     def run(self) -> tuple[float, list[float]]:
         while self.g < self.G:
+            self.swarm.sort(reverse=True)
             self._updateSwarm()
-            self._updateGbest()
             self.g += 1
-        gbest = self.swarm[self.gBestIndex]
+        self.swarm.sort(reverse=True)
+        gbest = self.swarm[0]
         return (gbest.fpbest, gbest.pbest)
 
     def __init__(
@@ -23,8 +29,9 @@ class BareBonesPSO:
             objectFunction:Problem,
             populationSize:int = 20,
             maxGeneration:int = 4000,
-            interactionProbability:float = 0.5,
-            initialSwarm:list[BareBonesParticle] = None
+            c:float = 0.3,
+            alpha:float = 0.8,
+            initialSwarm:list[ExtraParticle] = None
         ) -> None:
         
         self.f = objectFunction.evaluate
@@ -33,7 +40,9 @@ class BareBonesPSO:
         self.dim = objectFunction.D
         self.popSize = populationSize
         self.G = maxGeneration
-        self.ip = interactionProbability
+        self.c = c
+        self.alpha = alpha
+        self.Tup = round(self.alpha * self.popSize)
         self.g = 0
 
         self.lb = objectFunction.lb
@@ -42,43 +51,31 @@ class BareBonesPSO:
         self.swarm = initialSwarm
         if not self.swarm:
             self._initialSwarm()
-        
-        self.gBestIndex:int = 0
-        self._updateGbest()
-    
+
     def _initialSwarm(self) -> None:
         self.swarm = []
         for _ in range(self.popSize):
-            newParticle = BareBonesParticle(self.dim)
+            newParticle = ExtraParticle(self.dim, self.fitter)
             for d in range(self.dim):
                 newParticle.x[d] = rand(self.lb[d], self.ub[d])
             newParticle.fx = self.f(newParticle.x)
             newParticle.updatePbest()
             self.swarm.append(newParticle)
 
-    def _updateGbest(self) -> None:
-        for i in range(self.popSize):
-            if self.fitter(self.swarm[i].fpbest, self.swarm[self.gBestIndex].fpbest):
-                self.gBestIndex = i
-    
     def _updateSwarm(self) -> None:
-        gBest = self.swarm[self.gBestIndex]
         for i in range(self.popSize):
             p = self.swarm[i]
-            for d in range(self.dim):
-                # interaction probability
-                r = rand(0,1)
-                if r < 0.5:
-                    # use gauss distribution to update
-                    p.x[d] = gauss(
-                        mu = (p.pbest[d] + gBest.pbest[d]) / 2,
-                        sigma = (abs(p.pbest[d] - gBest.pbest[d])) 
-                    )
-                else:
-                    # learn from previous best
-                    p.x[d] = p.pbest[d]
-                # amend position
-                p.x[d] = max(self.lb[d], min(self.ub[d], p.x[d]))
+            examplarIdx = round(rand(0,1) * self.popSize)
+            if examplarIdx < self.Tup:
+                # learn from examplar
+                examplar = self.swarm[examplarIdx]
+                for d in range(self.dim):
+                    p.x[d] = p.x[d] + self.c * (examplar.x[d] - p.x[d])
+                    p.x[d] = max(self.lb[d], min(self.ub[d], p.x[d]))
+            else:
+                # random search
+                for d in range(self.dim):
+                    p.x[d] = rand(self.lb[d], self.ub[d])
             # evaluate fitness and update pbest
             p.fx = self.f(p.x)
             if (self.fitter(p.fx, p.fpbest)):
