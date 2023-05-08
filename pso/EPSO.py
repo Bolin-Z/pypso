@@ -70,7 +70,7 @@ class EPSO:
                 # learn from examplar
                 examplar = self.swarm[examplarIdx]
                 for d in range(self.dim):
-                    p.x[d] = p.x[d] + self.c * (examplar.x[d] - p.x[d])
+                    p.x[d] = p.x[d] + self.c * (examplar.pbest[d] - p.x[d])
                     p.x[d] = max(self.lb[d], min(self.ub[d], p.x[d]))
             else:
                 # random search
