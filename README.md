@@ -13,6 +13,7 @@ Particle Swarm Optimization and its variants implemented in python
 9. Extraordinariness PSO
 10. Adaptive Search Diversification in PSO
 11. Self-adaptive PSO with multiple velocity strategies
+12. Relaxation velocity update PSO
 
 # Test functions
 ## Unimodal functions

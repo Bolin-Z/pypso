@@ -24,7 +24,8 @@ if __name__ == "__main__":
         # OLPSO,
         # EPSO,
         # ASDPSO,
-        SAPSOMVS
+        # SAPSOMVS,
+        RVUPSO
     ]
     for f in problems:
         print(f"{f}:")
