@@ -14,7 +14,7 @@ if __name__ == "__main__":
         )
     }
     algs = [
-        OriginalPSO,
+        # OriginalPSO,
         CanonicalPSO,
         # BareBonesPSO,
         # AIWPSO, 
@@ -23,7 +23,8 @@ if __name__ == "__main__":
         # DMSPSO,
         # OLPSO,
         # EPSO,
-        ASDPSO
+        # ASDPSO,
+        SAPSOMVS
     ]
     for f in problems:
         print(f"{f}:")
