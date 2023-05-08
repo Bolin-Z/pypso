@@ -91,6 +91,8 @@ class SAPSOMVS:
         dt1 = 0.1
         mu2 = 0.4 * (1 - (self.g / self.G) ** 2) + 0.2
         dt2 = 0.4
+        cauchymu1dt1 = cauchy.rvs(loc=mu1, scale=dt1, size=self.popSize * 2)
+        cauchymu2dt2 = cauchy.rvs(loc=mu2, scale=dt2, size=self.popSize * 2)
         gBest = self.swarm[self.gBestIndex]
         for i in range(self.popSize):
             p = self.swarm[i]
@@ -101,11 +103,11 @@ class SAPSOMVS:
                                 + p.c2 * rand(0,1) * (gBest.pbest[d] - p.x[d])
             else:
                 # cauchy random number
-                cauchy1 = cauchy.rvs(loc=mu1, scale=dt1)
-                cauchy2 = cauchy.rvs(loc=mu1, scale=dt1)
+                cauchy1 = cauchymu1dt1[i]
+                cauchy2 = cauchymu1dt1[i + 1]
                 if rand(0,1) > 0.5:
-                    cauchy1 = cauchy.rvs(loc=mu2, scale=dt2)
-                    cauchy2 = cauchy.rvs(loc=mu2, scale=dt2)
+                    cauchy1 = cauchymu2dt2[i]
+                    cauchy2 = cauchymu2dt2[i + 1]
                 for d in range(self.dim):
                     p.v[d] = p.w * p.v[d] + p.c1 * cauchy1 * (p.pbest[d] - p.x[d]) \
                                 + p.c2 * cauchy2 * (gBest.pbest[d] - p.x[d])
@@ -134,10 +136,14 @@ class SAPSOMVS:
         w = sum([weights[i] * self.swarm[i].w for i in range(self.popSize)])
         c1 = sum([weights[i] * self.swarm[i].c1 for i in range(self.popSize)])
         c2 = sum([weights[i] * self.swarm[i].c2 for i in range(self.popSize)])
-        for p in self.swarm:
-            p.w = cauchy.rvs(loc=w, scale=self.dtw)
-            p.c1 = cauchy.rvs(loc=c1, scale=self.dtc1)
-            p.c2 = cauchy.rvs(loc=c2, scale=self.dtc2)
+        cauchyw = cauchy.rvs(loc = w, scale=self.dtw, size=self.popSize)
+        cauchyc1 = cauchy.rvs(loc=c1, scale=self.dtc1, size=self.popSize)
+        cauchyc2 = cauchy.rvs(loc=c2, scale=self.dtc2, size=self.popSize)
+        for i in range(self.popSize):
+            p = self.swarm[i]
+            p.w = cauchyw[i]
+            p.c1 = cauchyc1[i]
+            p.c2 = cauchyc2[i]
             if p.w > 1.0:
                 p.w = rand(0,1)
             elif p.w < 0:
