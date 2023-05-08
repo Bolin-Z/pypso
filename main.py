@@ -2,7 +2,6 @@ from pso import *
 from copy import deepcopy
 from functions import *
 
-
 if __name__ == "__main__":
     problems = {
         "sphere" : Sphere(
@@ -15,15 +14,16 @@ if __name__ == "__main__":
         )
     }
     algs = [
-        # OriginalPSO,
-        # CanonicalPSO,
+        OriginalPSO,
+        CanonicalPSO,
         # BareBonesPSO,
         # AIWPSO, 
         # ALCPSO,
         # VonNeumannPSO,
         # DMSPSO,
         # OLPSO,
-        EPSO
+        # EPSO,
+        ASDPSO
     ]
     for f in problems:
         print(f"{f}:")

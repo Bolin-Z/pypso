@@ -6,6 +6,7 @@ from .ALCPSO import ALCPSO
 from .DMSPSO import DMSPSO
 from .OLPSO import OLPSO
 from .EPSO import EPSO
+from .ASDPSO import ASDPSO
 
 __all__ = [
     "OriginalPSO",
@@ -16,5 +17,6 @@ __all__ = [
     "ALCPSO",
     "DMSPSO",
     "OLPSO",
-    "EPSO"
+    "EPSO",
+    "ASDPSO"
 ]

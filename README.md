@@ -11,6 +11,7 @@ Particle Swarm Optimization and its variants implemented in python
 7. Dynamic multi-swarm PSO
 8. Orthogonal learning PSO
 9. Extraordinariness PSO
+10. Adaptive Search Diversification in PSO
 
 # Test functions
 ## Unimodal functions
