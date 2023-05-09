@@ -95,11 +95,11 @@ class DMSPSO:
     def _updateSwarm(self, globalMode:bool) -> None:
         for i in range(self.popSize):
             p = self.swarm[i]
-            examplar = self.swarm[self.gBestIndex] if globalMode else self._getLocalBest(i)
+            exemplar = self.swarm[self.gBestIndex] if globalMode else self._getLocalBest(i)
             for d in range(self.dim):
                 # update velocity
                 p.v[d] = self.w * p.v[d] + self.c1 * rand(0,1) * (p.pbest[d] - p.x[d]) \
-                            + self.c2 * rand(0,1) * (examplar.pbest[d] - p.x[d])
+                            + self.c2 * rand(0,1) * (exemplar.pbest[d] - p.x[d])
                 p.v[d] = max(-self.vmax[d], min(self.vmax[d], p.v[d]))
                 # update position
                 p.x[d] = p.x[d] + p.v[d]

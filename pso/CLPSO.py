@@ -90,8 +90,8 @@ class CLPSO:
             inRange = True
             for d in range(self.dim):
                 # update velocity
-                examplar = self.swarm[p.fi[d]]
-                p.v[d] = self.w * p.v[d] + self.c * rand(0,1) * (examplar.pbest[d] - p.x[d])
+                exemplar = self.swarm[p.fi[d]]
+                p.v[d] = self.w * p.v[d] + self.c * rand(0,1) * (exemplar.pbest[d] - p.x[d])
                 p.v[d] = max(-self.vmax[d], min(p.v[d], self.vmax[d]))
                 # update position
                 p.x[d] = p.x[d] + p.v[d]

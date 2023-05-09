@@ -65,12 +65,12 @@ class EPSO:
     def _updateSwarm(self) -> None:
         for i in range(self.popSize):
             p = self.swarm[i]
-            examplarIdx = round(rand(0,1) * self.popSize)
-            if examplarIdx < self.Tup:
-                # learn from examplar
-                examplar = self.swarm[examplarIdx]
+            exemplarIdx = round(rand(0,1) * self.popSize)
+            if exemplarIdx < self.Tup:
+                # learn from exemplar
+                exemplar = self.swarm[exemplarIdx]
                 for d in range(self.dim):
-                    p.x[d] = p.x[d] + self.c * (examplar.pbest[d] - p.x[d])
+                    p.x[d] = p.x[d] + self.c * (exemplar.pbest[d] - p.x[d])
                     p.x[d] = max(self.lb[d], min(self.ub[d], p.x[d]))
             else:
                 # random search

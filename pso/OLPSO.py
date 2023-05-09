@@ -84,8 +84,8 @@ class OLPSO:
             p = self.swarm[i]
             for d in range(self.dim):
                 # update velocity
-                examplar = self.swarm[p.guideIdx[d]]
-                p.v[d] = self.w * p.v[d] + self.c * rand(0,1) * (examplar.pbest[d] - p.x[d])
+                exemplar = self.swarm[p.guideIdx[d]]
+                p.v[d] = self.w * p.v[d] + self.c * rand(0,1) * (exemplar.pbest[d] - p.x[d])
                 p.v[d] = max(-self.vmax[d], min(self.vmax[d], p.v[d]))
                 # update position
                 p.x[d] = p.x[d] + p.v[d]
@@ -109,18 +109,18 @@ class OLPSO:
     def _constructGuidance(self, idx:int) -> None:
         p = self.swarm[idx]
         p.stagnate = 0
-        # find examplar
-        examplarIdx = self.gBestIndex
-        while examplarIdx == idx:
-            examplarIdx = randrange(0, self.popSize)
-        examplar = self.swarm[examplarIdx]
+        # find exemplar
+        exemplarIdx = self.gBestIndex
+        while exemplarIdx == idx:
+            exemplarIdx = randrange(0, self.popSize)
+        exemplar = self.swarm[exemplarIdx]
         # construct test set
         x:list[list[float]] = [[0.0 for _ in range(self.dim)] for _ in range(len(self._OA))]
         fx = [0.0 for _ in range(len(self._OA))]
         xBest:int = 0
         for j in range(len(self._OA)):
             for d in range(self.dim):
-                x[j][d] = p.pbest[d] if self._OA[j][d] == 1 else examplar.pbest[d]
+                x[j][d] = p.pbest[d] if self._OA[j][d] == 1 else exemplar.pbest[d]
             fx[j] = self.f(x[j])
             if self.fitter(fx[j], fx[xBest]):
                 xBest = j
@@ -128,26 +128,26 @@ class OLPSO:
         xp = [0.0 for _ in range(self.dim)]
         for d in range(self.dim):
             levelPbest = 0.0
-            levelExamplar = 0.0
+            levelExemplar = 0.0
             for case in self._oneIdx[d]:
                 levelPbest = levelPbest + fx[case]
             for case in self._twoIdx[d]:
-                levelExamplar = levelExamplar + fx[case]
+                levelExemplar = levelExemplar + fx[case]
             levelPbest = levelPbest / len(self._oneIdx)
-            levelExamplar = levelExamplar / len(self._twoIdx)
-            if self.fitter(levelPbest, levelExamplar):
+            levelExemplar = levelExemplar / len(self._twoIdx)
+            if self.fitter(levelPbest, levelExemplar):
                 xp[d] = p.pbest[d]
                 p.guideIdx[d] = idx
             else:
-                xp[d] = examplar.pbest[d]
-                p.guideIdx[d] = examplarIdx
+                xp[d] = exemplar.pbest[d]
+                p.guideIdx[d] = exemplarIdx
         fxp = self.f(xp)
         if self.fitter(fx[xBest], fxp):
             for d in range(self.dim):
                 if self._OA[xBest][d] == 1:
                     p.guideIdx[d] = idx
                 else:
-                    p.guideIdx[d] = examplarIdx
+                    p.guideIdx[d] = exemplarIdx
 
     def _generateOA(self, factorNum:int) -> None:
         n = 2 ** (ceil(log2(factorNum + 1)))
