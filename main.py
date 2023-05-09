@@ -28,7 +28,8 @@ if __name__ == "__main__":
         # RVUPSO,
         # DNSPSO,
         # APSO,
-        FDRPSO
+        # FDRPSO,
+        CLPSO
     ]
     for f in problems:
         print(f"{f}:")

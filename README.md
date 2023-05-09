@@ -17,6 +17,7 @@ Particle Swarm Optimization and its variants implemented in python
 13. Diversity enhancing mechanism and neighborhood search strategies PSO
 14. Adaptive PSO
 15. Fitness-distance-ratio based PSO
+16. Comprehensive learning PSO
 
 # Test functions
 ## Unimodal functions

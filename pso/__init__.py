@@ -12,6 +12,7 @@ from .RVUPSO import RVUPSO
 from .DNSPSO import DNSPSO
 from .APSO import APSO
 from .FDRPSO import FDRPSO
+from .CLPSO import CLPSO
 
 __all__ = [
     "OriginalPSO",
@@ -28,5 +29,6 @@ __all__ = [
     "RVUPSO",
     "DNSPSO",
     "APSO",
-    "FDRPSO"
+    "FDRPSO",
+    "CLPSO"
 ]
