@@ -11,3 +11,5 @@ class Griewand(Problem):
             totalSum += ((x[i] ** 2) / 4000)
             totalProduct *= cos(x[i] / sqrt(i))
         return totalSum - totalProduct + 1
+    def err(self, fval: float) -> float:
+        return abs(fval - 0.0)

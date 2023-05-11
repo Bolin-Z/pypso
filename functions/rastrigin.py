@@ -9,3 +9,5 @@ class Rastrigin(Problem):
         for x in solution:
             res += ((x ** 2) - 10 * cos(2 * pi * x))
         return 10 * self.D + res
+    def err(self, fval: float) -> float:
+        return abs(fval - 0.0)

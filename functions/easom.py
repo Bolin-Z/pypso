@@ -8,3 +8,5 @@ class Easom(Problem):
         x1 = solution[0]
         x2 = solution[1]
         return -cos(x1) * cos(x2) * exp(-((x1 - pi) ** 2) - ((x2 - pi) ** 2))
+    def err(self, fval: float) -> float:
+        return abs(fval + 1.0)

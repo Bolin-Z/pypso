@@ -8,3 +8,5 @@ class SumSquare(Problem):
         for i in range(self.D):
             res += i * (x[i] ** 2)
         return res
+    def err(self, fval: float) -> float:
+        return abs(fval - 0.0)

@@ -12,3 +12,5 @@ class Zakharov(Problem):
             sum2 += 0.5 * i * x[i]
             sum3 += 0.5 * i * x[i]
         return sum1 + (sum2 ** 2) + (sum3 ** 4)
+    def err(self, fval: float) -> float:
+        return abs(fval - 0.0)

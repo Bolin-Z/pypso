@@ -15,3 +15,5 @@ class Ackley(Problem):
             alpha += (x ** 2)
             beta += cos(c * x)
         return - a * exp(-b * sqrt(alpha / d)) - exp(beta / d) + a + exp(1)
+    def err(self, fval: float) -> float:
+        return abs(fval - 0.0)

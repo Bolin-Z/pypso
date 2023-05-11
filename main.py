@@ -1,13 +1,15 @@
 from pso import *
 from copy import deepcopy
 from functions import *
+from numpy import mean, median, std
+import os
 
 if __name__ == "__main__":
     problems = {
-        # "Sphere" : Sphere(
-        #     [-100 for _ in range(5)],
-        #     [ 100 for _ in range(5)]
-        # ),
+        "Sphere" : Sphere(
+            [-100 for _ in range(10)],
+            [ 100 for _ in range(10)]
+        ),
         # "schaffer" : Schaffer(
         #     [-100 for _ in range(2)],
         #     [ 100 for _ in range(2)]
@@ -21,16 +23,16 @@ if __name__ == "__main__":
         #     [10 for _ in range(5)]
         # ),
         "Rastrigin" : Rastrigin(
-            [-5.12 for _ in range(5)],
-            [ 5.12 for _ in range(5)]
+            [-5.12 for _ in range(10)],
+            [ 5.12 for _ in range(10)]
         )
     }
     algs = [
         # OriginalPSO,
         # CanonicalPSO,
-        BareBonesPSO,
-        # AIWPSO, 
-        ALCPSO,
+        # BareBonesPSO,
+        AIWPSO,
+        ALCPSO
         # VonNeumannPSO,
         # DMSPSO,
         # OLPSO,
@@ -39,15 +41,53 @@ if __name__ == "__main__":
         # SAPSOMVS,
         # RVUPSO,
         # DNSPSO,
-        APSO
+        # APSO
         # FDRPSO,
         # CLPSO
     ]
-    for f in problems:
-        print(f"{f}:")
-        for alg in algs:
-            pso = alg(objectFunction = problems[f], maxGeneration = 50000)
-            val, res = pso.run()
-            print(f"\t{alg.__name__}")
-            print(f"\t\t{val}")
-            print(f"\t\t{res}")
+    runNumber = 5
+    for alg in algs:
+        dirPath = "./result/" + alg.__name__
+        if not os.path.exists(dirPath):
+            os.mkdir(dirPath)
+        for func in problems:
+            filePath = dirPath + "/" + func + ".txt"
+            with open(filePath, 'w', encoding="UTF-8") as f:
+                f.write(f"{func}\n\n")
+                print("-" * 30)
+                print(f"start\nalg:{alg.__name__}\nfunc:{func}")
+                results = []
+                for i in range(runNumber):
+                    print(f"+ test {i}")
+                    f.write(f"test {i}\n")
+                    pso = alg(objectFunction = problems[func], maxFEs = problems[func].D * 10000)
+                    res = pso.run()
+                    results.append(res)
+                    f.write("FEs\t\tGen\t\tErr\n")
+                    for t in res:
+                        fe, g, err = t
+                        f.write(f"{fe}\t\t{g}\t\t{err}\n")
+                    f.write("\n\n")
+                    print(f"- finish test {i}")
+                # analysis
+                print("start analysis")
+                recordlen = len(results[0])
+                finalSol = [results[i][recordlen - 1][2] for i in range(runNumber)]
+                finalSol.sort()
+                bestVal= finalSol[0]
+                worstVal = finalSol[-1]
+                meanVal = mean(finalSol)
+                medianVal = median(finalSol)
+                stdevVal = std(finalSol)
+                f.write(f"---------- Analysist ----------\n")
+                f.write(f"Runs:{runNumber}\n")
+                f.write("Best: %.4E\nWorst: %.4E\nMedian: %.4E\n" % (bestVal, worstVal, medianVal))
+                f.write("Mean(SD): %.4E(%.4E)\n\n" % (meanVal, stdevVal))
+                # compute the mean of each FEs
+                f.write("Mean of Err in each FEs\n")
+                f.write("FEs\t\tMean(SD)\n")
+                for i in range(recordlen):
+                    solutions = [results[x][i][2] for x in range(runNumber)]
+                    f.write("%d\t\t%.4E(%.4E)\n" % (results[0][i][0], mean(solutions), std(solutions)))
+                print("finish analysis")
+                    

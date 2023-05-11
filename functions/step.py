@@ -9,3 +9,5 @@ class Step(Problem):
         for x in solution:
             res += (floor(x + 0.5)) ** 2
         return res
+    def err(self, fval: float) -> float:
+        return abs(fval - 0.0)

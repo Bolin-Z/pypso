@@ -10,3 +10,5 @@ class Sphere(Problem):
         for i in range(self.D):
             res += solution[i] ** 2
         return res
+    def err(self, fval:float) -> float:
+        return abs(fval - 0.0)

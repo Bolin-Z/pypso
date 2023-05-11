@@ -25,3 +25,10 @@ class Problem(ABC):
         object function
         """
         pass
+
+    @abstractmethod
+    def err(self, fval:float) -> float:
+        """
+        abs(fval - f*)
+        """
+        pass

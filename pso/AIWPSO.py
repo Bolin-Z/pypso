@@ -7,8 +7,8 @@ from random import gauss as gauss
 from random import randrange as randrange
 
 class AIWPSO:
-    def run(self) -> tuple[float, list[float]]:
-        while self.g < self.G:
+    def run(self) -> list[tuple[int, int, float]]:
+        while self.fecounter < self.maxFEs:
             # count number of improved particles in this generation
             self.successCount = 0
             self._updateSwarm()
@@ -16,14 +16,14 @@ class AIWPSO:
             self._updateInertiaWeight()
             self._mutatedAndReplace()
             self.g += 1
-        gbest = self.swarm[self.gBestIndex]
-        return (gbest.fpbest, gbest.pbest)
+        return self.result
 
     def __init__(
             self,
             objectFunction:Problem,
             populationSize:int = 20,
             maxGeneration:int = 4000,
+            maxFEs:int = 10000,
             c1:float = 1.49445,
             c2:float = 1.49445,
             wmin:float = 0.0,
@@ -32,8 +32,13 @@ class AIWPSO:
             initialSwarm:list[CanonicalParticle] = None
         ) -> None:
 
-        self.f = objectFunction.evaluate
+        self.result:list[tuple[int, int, float]] = []
+
+        self.fecounter:int = 0
+        self.maxFEs = maxFEs
+        self.evaluate = objectFunction.evaluate
         self.fitter = objectFunction.fitter
+        self.err = objectFunction.err
 
         self.dim = objectFunction.D
         self.popSize = populationSize
@@ -117,3 +122,11 @@ class AIWPSO:
         gWorst.fpbest = self.f(gWorst.pbest)
         if self.fitter(gWorst.fpbest, gBest.fpbest):
             self.gBestIndex = self.gWorstIndex
+    
+    def f(self, x:list[float]) -> float:
+        self.fecounter += 1
+        t = [0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+        for i in t:
+            if self.fecounter == self.maxFEs * i:
+                self.result.append((self.fecounter, self.g, self.err(self.swarm[self.gBestIndex].fpbest)))
+        return self.evaluate(x)
