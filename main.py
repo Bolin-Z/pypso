@@ -4,21 +4,33 @@ from functions import *
 
 if __name__ == "__main__":
     problems = {
-        "sphere" : Sphere(
-            [-100 for _ in range(5)],
-            [ 100 for _ in range(5)]
-        ),
-        "schaffer" : Schaffer(
-            [-100 for _ in range(2)],
-            [ 100 for _ in range(2)]
+        # "Sphere" : Sphere(
+        #     [-100 for _ in range(5)],
+        #     [ 100 for _ in range(5)]
+        # ),
+        # "schaffer" : Schaffer(
+        #     [-100 for _ in range(2)],
+        #     [ 100 for _ in range(2)]
+        # ),
+        # "Ackley" :  Ackley(
+        #     [-32.768 for _ in range(30)],
+        #     [ 32.768 for _ in range(30)]
+        # ),
+        # "Rosenbrock" : Rosenbrock(
+        #     [-5 for _ in range(5)],
+        #     [10 for _ in range(5)]
+        # ),
+        "Rastrigin" : Rastrigin(
+            [-5.12 for _ in range(5)],
+            [ 5.12 for _ in range(5)]
         )
     }
     algs = [
         # OriginalPSO,
-        CanonicalPSO,
-        # BareBonesPSO,
+        # CanonicalPSO,
+        BareBonesPSO,
         # AIWPSO, 
-        # ALCPSO,
+        ALCPSO,
         # VonNeumannPSO,
         # DMSPSO,
         # OLPSO,
@@ -27,14 +39,14 @@ if __name__ == "__main__":
         # SAPSOMVS,
         # RVUPSO,
         # DNSPSO,
-        # APSO,
+        APSO
         # FDRPSO,
-        CLPSO
+        # CLPSO
     ]
     for f in problems:
         print(f"{f}:")
         for alg in algs:
-            pso = alg(problems[f])
+            pso = alg(objectFunction = problems[f], maxGeneration = 50000)
             val, res = pso.run()
             print(f"\t{alg.__name__}")
             print(f"\t\t{val}")

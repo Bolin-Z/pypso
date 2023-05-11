@@ -25,7 +25,14 @@ Particle Swarm Optimization and its variants implemented in python
    $$
       f(x) = \sum_{i = 1}^{D} x_i ^2
    $$
-2. **Schaffer's f6**
+2. **Schaffer's f6** (2D)
    $$
       f(x,y) = 0.5 + \frac{\sin^2{(\sqrt{x^2 + y^2 })- 0.5}}{[1+0.001\cdot (x^2 + y^2)]^2 }
    $$
+## Multimodal functions
+1. **Ackley**
+   $$
+      f(\vec{x}) = -a e^{-b\sqrt{\frac{1}{d}\sum_{i=1}^{d}x_i ^2 }} - e ^ {\frac{1}{d}\sum_{i=1}^d \cos(cx_i )} + a + e^1
+   $$
+   Recommended variable values: $a = 20, b = 0.2, c = 2\pi$
+   $f(\vec{x}*) = 0$ at $\vec{x}* = (0,\dots , 0)$
