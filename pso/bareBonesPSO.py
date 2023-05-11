@@ -21,7 +21,7 @@ class BareBonesPSO:
             self,
             objectFunction:Problem,
             samplePoints:list[float],
-            populationSize:int = 20,
+            populationSize:int = 30,
             maxGeneration:int = 4000,
             maxFEs:int = 10000,
             interactionProbability:float = 0.5,

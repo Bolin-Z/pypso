@@ -6,73 +6,73 @@ import os
 
 if __name__ == "__main__":
     # lab parameters
-    dimension = 5
-    runNumber = 3
+    dimension = 10
+    runNumber = 30
     sampleFEsPoints:list[float] = [0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
     # define benchmark functions
     problems = {
-        # "Sphere" : Sphere(
-        #     [-5.12 for _ in range(dimension)],
-        #     [ 5.12 for _ in range(dimension)]
-        # ),
-        # "SumSquare" : SumSquare(
-        #     [-5.12 for _ in range(dimension)],
-        #     [ 5.12 for _ in range(dimension)]
-        # ),
-        # "schaffer" : Schaffer(
-        #     [-100 for _ in range(2)],
-        #     [ 100 for _ in range(2)]
-        # ),
+        "Sphere" : Sphere(
+            [-5.12 for _ in range(dimension)],
+            [ 5.12 for _ in range(dimension)]
+        ),
+        "SumSquare" : SumSquare(
+            [-5.12 for _ in range(dimension)],
+            [ 5.12 for _ in range(dimension)]
+        ),
+        "schaffer" : Schaffer(
+            [-100 for _ in range(2)],
+            [ 100 for _ in range(2)]
+        ),
         "Ackley" :  Ackley(
             [-32.768 for _ in range(dimension)],
             [ 32.768 for _ in range(dimension)]
+        ),
+        "Rastrigin" : Rastrigin(
+            [-5.12 for _ in range(dimension)],
+            [ 5.12 for _ in range(dimension)]
+        ),
+        "Griewand" : Griewand(
+            [-600 for _ in range(dimension)],
+            [ 600 for _ in range(dimension)]
+        ),
+        "Rosenbrock" : Rosenbrock(
+            [-5 for _ in range(dimension)],
+            [10 for _ in range(dimension)]
+        ),
+        "Zakharov" : Zakharov(
+            [-5 for _ in range(dimension)],
+            [10 for _ in range(dimension)]
+        ),
+        "Easom" : Easom(
+            [-100 for _ in range(dimension)],
+            [ 100 for _ in range(dimension)]
+        ),
+        "Step" : Step(
+            [-100 for _ in range(dimension)],
+            [ 100 for _ in range(dimension)]
+        ),
+        "QuarticWithNoise" : QuarticWithNoise(
+            [-1.28 for _ in range(dimension)],
+            [ 100 for _ in range(dimension)]
         )
-        # "Rastrigin" : Rastrigin(
-        #     [-5.12 for _ in range(dimension)],
-        #     [ 5.12 for _ in range(dimension)]
-        # ),
-        # "Griewand" : Griewand(
-        #     [-600 for _ in range(dimension)],
-        #     [ 600 for _ in range(dimension)]
-        # ),
-        # "Rosenbrock" : Rosenbrock(
-        #     [-5 for _ in range(dimension)],
-        #     [10 for _ in range(dimension)]
-        # ),
-        # "Zakharov" : Zakharov(
-        #     [-5 for _ in range(dimension)],
-        #     [10 for _ in range(dimension)]
-        # ),
-        # "Easom" : Easom(
-        #     [-100 for _ in range(dimension)],
-        #     [ 100 for _ in range(dimension)]
-        # ),
-        # "Step" : Step(
-        #     [-100 for _ in range(dimension)],
-        #     [ 100 for _ in range(dimension)]
-        # ),
-        # "QuarticWithNoise" : QuarticWithNoise(
-        #     [-1.28 for _ in range(dimension)],
-        #     [ 100 for _ in range(dimension)]
-        # )
     }
     # tested algorithms
     algs = [
-        # OriginalPSO,
-        # CanonicalPSO,
-        # BareBonesPSO,
+        OriginalPSO,
+        CanonicalPSO,
+        BareBonesPSO,
         AIWPSO,
-        # ALCPSO
-        # VonNeumannPSO
-        # DMSPSO,
-        # OLPSO,
-        # EPSO,
-        # ASDPSO,
-        # SAPSOMVS,
-        # RVUPSO,
-        # DNSPSO,
-        # APSO,
-        # FDRPSO,
+        ALCPSO,
+        VonNeumannPSO,
+        DMSPSO,
+        OLPSO,
+        EPSO,
+        ASDPSO,
+        SAPSOMVS,
+        RVUPSO,
+        DNSPSO,
+        APSO,
+        FDRPSO,
         CLPSO
     ]
 
