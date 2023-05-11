@@ -9,8 +9,8 @@ class Zakharov(Problem):
         sum3 = 0.0
         for i in range(self.D):
             sum1 += x[i] ** 2
-            sum2 += 0.5 * i * x[i]
-            sum3 += 0.5 * i * x[i]
+            sum2 += 0.5 * (i + 1) * x[i]
+            sum3 += 0.5 * (i + 1) * x[i]
         return sum1 + (sum2 ** 2) + (sum3 ** 4)
     def err(self, fval: float) -> float:
         return abs(fval - 0.0)

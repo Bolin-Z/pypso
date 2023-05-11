@@ -6,9 +6,9 @@ from random import uniform as rand
 from random import shuffle as shuffle
 
 class DMSPSO:
-    def run(self) -> tuple[float, list[float]]:
+    def run(self) -> list[tuple[int, int, float]]:
         globalMode = False
-        while self.g < self.G:
+        while self.fecounter < self.maxFEs:
             self._updateSwarm(globalMode)
             self._updateGbest()
             self._updateInertiaWeight()
@@ -17,16 +17,17 @@ class DMSPSO:
                 self._regroup()
             if not globalMode and self.g >= 0.9 * self.G:
                 globalMode = True
-        gbest = self.swarm[self.gBestIndex]
-        return (gbest.fpbest, gbest.pbest)
+        return self.result
 
     def __init__(
             self,
             objectFunction:Problem,
+            samplePoints:list[float],
             subSwarmSize:int = 3,
             subSwarmNumber:int = 10,
             regroupPeriod:int = 5,
             maxGeneration:int = 2000,
+            maxFEs:int = 10000,
             c1:float = 1.49445,
             c2:float = 1.49445,
             wmin:float = 0.2,
@@ -35,8 +36,14 @@ class DMSPSO:
             initialSwarm:list[ParticleWithNeighbours] = None
         ) -> None:
         
-        self.f = objectFunction.evaluate
+        self.result:list[tuple[int, int, float]] = []
+
+        self.fecounter:int = 0
+        self.maxFEs = maxFEs
+        self.samplePoints = [self.maxFEs * p for p in samplePoints]
+        self.evaluate = objectFunction.evaluate
         self.fitter = objectFunction.fitter
+        self.err = objectFunction.err
 
         self.dim = objectFunction.D
         self.subSwarmSize = subSwarmSize
@@ -119,3 +126,9 @@ class DMSPSO:
 
     def _updateInertiaWeight(self) -> None:
         self.w = self.wmax - (self.wmax - self.wmin) * (self.g / self.G)
+
+    def f(self, x:list[float]) -> float:
+        self.fecounter += 1
+        if self.fecounter in self.samplePoints:
+            self.result.append((self.fecounter, self.g, self.err(self.swarm[self.gBestIndex].fpbest)))
+        return self.evaluate(x)

@@ -5,35 +5,65 @@ from numpy import mean, median, std
 import os
 
 if __name__ == "__main__":
+    # lab parameters
+    dimension = 5
+    runNumber = 3
+    sampleFEsPoints:list[float] = [0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+    # define benchmark functions
     problems = {
-        "Sphere" : Sphere(
-            [-100 for _ in range(10)],
-            [ 100 for _ in range(10)]
-        ),
+        # "Sphere" : Sphere(
+        #     [-5.12 for _ in range(dimension)],
+        #     [ 5.12 for _ in range(dimension)]
+        # ),
+        # "SumSquare" : SumSquare(
+        #     [-5.12 for _ in range(dimension)],
+        #     [ 5.12 for _ in range(dimension)]
+        # ),
         # "schaffer" : Schaffer(
         #     [-100 for _ in range(2)],
         #     [ 100 for _ in range(2)]
         # ),
-        # "Ackley" :  Ackley(
-        #     [-32.768 for _ in range(30)],
-        #     [ 32.768 for _ in range(30)]
+        "Ackley" :  Ackley(
+            [-32.768 for _ in range(dimension)],
+            [ 32.768 for _ in range(dimension)]
+        )
+        # "Rastrigin" : Rastrigin(
+        #     [-5.12 for _ in range(dimension)],
+        #     [ 5.12 for _ in range(dimension)]
+        # ),
+        # "Griewand" : Griewand(
+        #     [-600 for _ in range(dimension)],
+        #     [ 600 for _ in range(dimension)]
         # ),
         # "Rosenbrock" : Rosenbrock(
-        #     [-5 for _ in range(5)],
-        #     [10 for _ in range(5)]
+        #     [-5 for _ in range(dimension)],
+        #     [10 for _ in range(dimension)]
         # ),
-        "Rastrigin" : Rastrigin(
-            [-5.12 for _ in range(10)],
-            [ 5.12 for _ in range(10)]
-        )
+        # "Zakharov" : Zakharov(
+        #     [-5 for _ in range(dimension)],
+        #     [10 for _ in range(dimension)]
+        # ),
+        # "Easom" : Easom(
+        #     [-100 for _ in range(dimension)],
+        #     [ 100 for _ in range(dimension)]
+        # ),
+        # "Step" : Step(
+        #     [-100 for _ in range(dimension)],
+        #     [ 100 for _ in range(dimension)]
+        # ),
+        # "QuarticWithNoise" : QuarticWithNoise(
+        #     [-1.28 for _ in range(dimension)],
+        #     [ 100 for _ in range(dimension)]
+        # )
     }
+    # tested algorithms
     algs = [
         # OriginalPSO,
         # CanonicalPSO,
         # BareBonesPSO,
         AIWPSO,
-        ALCPSO
-        # VonNeumannPSO,
+        # ALCPSO
+        # VonNeumannPSO
         # DMSPSO,
         # OLPSO,
         # EPSO,
@@ -41,26 +71,28 @@ if __name__ == "__main__":
         # SAPSOMVS,
         # RVUPSO,
         # DNSPSO,
-        # APSO
+        # APSO,
         # FDRPSO,
-        # CLPSO
+        CLPSO
     ]
-    runNumber = 5
+
     for alg in algs:
         dirPath = "./result/" + alg.__name__
         if not os.path.exists(dirPath):
             os.mkdir(dirPath)
+        print("#" * 40)
+        print(f"Alg:{alg.__name__}")
         for func in problems:
             filePath = dirPath + "/" + func + ".txt"
             with open(filePath, 'w', encoding="UTF-8") as f:
                 f.write(f"{func}\n\n")
                 print("-" * 30)
-                print(f"start\nalg:{alg.__name__}\nfunc:{func}")
+                print(f"start\nfunc:{func}")
                 results = []
                 for i in range(runNumber):
                     print(f"+ test {i}")
                     f.write(f"test {i}\n")
-                    pso = alg(objectFunction = problems[func], maxFEs = problems[func].D * 10000)
+                    pso = alg(objectFunction = problems[func], samplePoints = sampleFEsPoints, maxFEs = problems[func].D * 10000)
                     res = pso.run()
                     results.append(res)
                     f.write("FEs\t\tGen\t\tErr\n")

@@ -1,8 +1,6 @@
 """sphere.py Sphere function
 """
-
 from .problem import Problem
-from typing import List
 
 class Sphere(Problem):
     def evaluate(self, solution: list[float]) -> float:

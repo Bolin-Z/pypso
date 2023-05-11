@@ -12,19 +12,20 @@ class CanonicalParticle(BaseParticle):
         self.v = [0.0 for _ in range(D)]
 
 class CanonicalPSO:
-    def run(self) -> tuple[float, list[float]]:
-        while self.g < self.G:
+    def run(self) -> list[tuple[int, int, float]]:
+        while self.fecounter < self.maxFEs:
             self._updateSwarm()
             self._updateGbest()
             self.g += 1
-        gbest = self.swarm[self.gBestIndex]
-        return (gbest.fpbest, gbest.pbest)
+        return self.result
     
     def __init__(
             self,
             objectFunction:Problem,
-            populationSize:int = 20, 
+            samplePoints:list[float],
+            populationSize:int = 20,
             maxGeneration:int = 4000,
+            maxFEs:int = 10000,
             c1:float = 2.0,
             c2:float = 2.0,
             w:float = 0.9,
@@ -32,8 +33,14 @@ class CanonicalPSO:
             initialSwarm:list[CanonicalParticle] = None
         ) -> None:
 
-        self.f = objectFunction.evaluate
+        self.result:list[tuple[int, int, float]] = []
+
+        self.fecounter:int = 0
+        self.maxFEs = maxFEs
+        self.samplePoints = [self.maxFEs * p for p in samplePoints]
+        self.evaluate = objectFunction.evaluate
         self.fitter = objectFunction.fitter
+        self.err = objectFunction.err
         
         self.dim = objectFunction.D
         self.popSize = populationSize
@@ -86,25 +93,35 @@ class CanonicalPSO:
             p.fx = self.f(p.x)
             if(self.fitter(p.fx, p.fpbest)):
                 p.updatePbest()
+    
+    def f(self, x:list[float]) -> float:
+        self.fecounter += 1
+        if self.fecounter in self.samplePoints:
+            self.result.append((self.fecounter, self.g, self.err(self.swarm[self.gBestIndex].fpbest)))
+        return self.evaluate(x)
 
 class OriginalPSO(CanonicalPSO):
     def __init__(
             self, 
-            objectFunction: Problem, 
+            objectFunction: Problem,
+            samplePoints:list[float],
             populationSize: int = 20, 
-            maxGeneration: int = 4000, 
+            maxGeneration: int = 4000,
+            maxFEs:int = 10000, 
             c1: float = 2.0, 
             c2: float = 2.0, 
             vmaxPercent: float = 0.2, 
             initialSwarm: list[CanonicalParticle] = None
         ) -> None:
         super().__init__(
-            objectFunction, 
+            objectFunction,
+            samplePoints,
             populationSize, 
-            maxGeneration, 
-            c1, 
+            maxGeneration,
+            maxFEs,
+            c1,
             c2, 
-            1.0, 
-            vmaxPercent, 
+            1.0,
+            vmaxPercent,
             initialSwarm
         )
