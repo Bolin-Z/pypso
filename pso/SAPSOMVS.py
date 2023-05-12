@@ -138,7 +138,13 @@ class SAPSOMVS:
         fmax = max(fvals)
         weights = [abs(f - fmax) for f in fvals]
         total = sum(weights)
-        weights = [ (w / total) for w in weights]
+        # may cause div 0 error when all f = fmax (convergence)
+        # weights = [ (w / total) for w in weights]
+        if total != 0:
+            weights = [ (w / total) for w in weights]
+        else:
+            # equal weight
+            weights = [1 / (self.popSize) for _ in range(self.popSize)]            
         # average values
         w = sum([weights[i] * self.swarm[i].w for i in range(self.popSize)])
         c1 = sum([weights[i] * self.swarm[i].c1 for i in range(self.popSize)])

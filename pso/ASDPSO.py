@@ -110,9 +110,11 @@ class ASDPSO:
                             + p.c2[d] * rand(0,1) * (gBest.pbest[d] - p.x[d])
                 newPosition[d] = p.x[d] + p.v[d]
                 # check whether it is out of domain
-                while (newPosition[d] < self.lb[d]) or (newPosition[d] > self.ub[d]):
-                    p.v[d] = p.v[d] * 0.9 * rand(0,1)
-                    newPosition[d] = p.x[d] + p.v[d]
+                # this method might cause inifnity loop if p.x[d] is closed to boundary
+                # while (newPosition[d] < self.lb[d]) or (newPosition[d] > self.ub[d]):
+                #     p.v[d] = p.v[d] * 0.9 * rand(0,1)
+                #     newPosition[d] = p.x[d] + p.v[d]
+                newPosition[d] = max(self.lb[d], min(newPosition[d], self.ub[d]))
             # check whether it is stuck
             if p.lastfx and abs(p.lastfx - p.fx) <= (10 ** (-10)):
                 dis = 0
@@ -141,6 +143,10 @@ class ASDPSO:
                 dis[i] = abs(p.x[d] - gBest.x[d])
                 if dis[i] > dis[dmax]:
                     dmax = i
+            # convergence
+            if dis[dmax] == 0.0:
+                # parameters remain unchange
+                continue
             # calculate parameter in dimension d
             for i in range(self.popSize):
                 p = self.swarm[i]

@@ -72,7 +72,7 @@ if __name__ == "__main__":
         RVUPSO,
         DNSPSO,
         APSO,
-        FDRPSO,
+        FDRPSO, 
         CLPSO
     ]
 
